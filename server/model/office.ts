@@ -94,6 +94,8 @@ export interface TranscriptSummary {
 }
 
 export interface MainInput {
+  /** Trusted provider-sanitized pseudonym, never a source title. */
+  characterName?: string;
   id: string;
   /** Ferramenta do agente (AgentInfo.provider); ausente = 'claude'. Os subagentes herdam a do principal. */
   provider?: Provider;
@@ -324,7 +326,9 @@ export class Office {
     const chosen = this.roomCharacter(roomId, p.id, p.sessionId);
     // A mesma sessão retomada noutro processo (ex.: "Assumir aqui") mantém o nome, mesmo com o processo antigo
     // ainda saindo do escritório.
-    const person = chosen ?? this.deps.names.assign(p.sessionId, this.takenNames(undefined, p.sessionId));
+    const person = p.provider === 'openclaw' && p.characterName
+      ? { name: p.characterName, look: 'm' as const }
+      : chosen ?? this.deps.names.assign(p.sessionId, this.takenNames(undefined, p.sessionId));
     const info: AgentInfo = {
       id: p.id,
       kind: 'main',

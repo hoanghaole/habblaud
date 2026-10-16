@@ -14,7 +14,7 @@ export type AgentKind = 'main' | 'sub';
  * - claude: Claude Code;
  * - codex: OpenAI Codex (CLI `codex` e o app desktop, que gravam no mesmo CODEX_HOME).
  */
-export type Provider = 'claude' | 'codex';
+export type Provider = 'claude' | 'codex' | 'openclaw';
 
 /**
  * Estado de alto nível de um agente — é o que dirige o comportamento do personagem.
@@ -254,6 +254,8 @@ export interface UpdateStatus {
 }
 
 export interface SourceInfo {
+  /** Metadata snapshot sampling time, not session activity time. */
+  observedAt?: number;
   /** Rótulo da conta (basename do config dir). */
   label: string;
   /** Ferramenta da fonte; ausente = 'claude'. */
