@@ -326,9 +326,11 @@ export function wuxiaFurnitureSprites(kind: FurnitureKind, variant?: string, sta
   });
 }
 
-/** Parede de época: reboco cor de papel com lambri de madeira; vidro e fachada externa ficam como estão. */
+/** Parede de época: reboco cor de papel com lambri de madeira; vidro fica como está; a externa vira muro laqueado. */
 export function wuxiaWallStyle(s: WallStyle): WallStyle {
-  if (s.exterior || s.pattern === 'glass') return { ...s, trim: '#8e2f2a' };
+  if (s.pattern === 'glass') return { ...s, trim: '#8e2f2a' };
+  // Fachada externa: muro baixo laqueado sob a telha escura (a tampa continua cinza-ardósia).
+  if (s.exterior) return { ...s, base: '#9a3a30', trim: '#5e1c19', pattern: 'plain' };
   return { base: '#eadcc0', trim: '#8e2f2a', pattern: 'wood_panel' };
 }
 

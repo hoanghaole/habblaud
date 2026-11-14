@@ -20,7 +20,7 @@ import { daylightModeOf, parseHourParam } from './daylight';
 import { RoomFxRenderer } from './github-fx';
 import { Lighting } from './lighting';
 import { Particles } from './particles';
-import { carSprite, propSprite, shadowSprite } from './props';
+import { carSprite, propSprite, shadowSprite, wuxiaPropSprite } from './props';
 import { countBadge, fallbackIcon } from './shell-sprites';
 import { drawWuxiaLights, paperScreen } from './wuxia';
 import { decorateElevator, drawSeasonalLights, drawSeasonalWindow, seasonalCostume, seasonalFurniture } from './seasonal';
@@ -1139,7 +1139,7 @@ export class Renderer {
       this.ctx.globalAlpha = 1;
       return;
     }
-    const s = propSprite(prop);
+    const s = (this.style === 'giangho' ? wuxiaPropSprite(prop) : null) ?? propSprite(prop);
     if (alpha < 1) this.ctx.globalAlpha = alpha;
     this.ctx.drawImage(s.canvas, Math.round(prop.x - s.ax), Math.round(prop.y - s.ay));
     this.ctx.globalAlpha = 1;

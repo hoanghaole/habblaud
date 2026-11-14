@@ -171,6 +171,8 @@ interface AnimState {
 }
 
 export class CityRenderer {
+  /** Id do meu prédio quando o estilo do escritório é giang hồ (a fachada dele vira um lầu các). */
+  private wuxiaBuilding: string | null = null;
   readonly ctx: CanvasRenderingContext2D;
   /** Prédios e personagens desenhados no último quadro (hit-test). */
   readonly buildingsDrawn: BuildingVis[] = [];
@@ -258,11 +260,13 @@ export class CityRenderer {
   /** Modelo da fachada de um prédio (refeito só quando o que aparece nela muda). */
   facadeOf(b: WorldBuildingPublic): FacadeModel {
     const a = b.agents;
-    const sig = `${b.floors}|${b.state}|${b.theme}|${a ? `${a.total},${a.working},${a.waiting}` : '-'}|${b.lot.x},${b.lot.y}`;
+    // Estilo giang hồ: só o meu prédio, e só na minha tela (os outros veem o prédio como o servidor manda).
+    const wuxia = this.wuxiaBuilding !== null && b.id === this.wuxiaBuilding;
+    const sig = `${b.floors}|${b.state}|${b.theme}|${a ? `${a.total},${a.working},${a.waiting}` : '-'}|${b.lot.x},${b.lot.y}|${wuxia ? 'wx' : ''}`;
     let c = this.facades.get(b.id);
     if (!c || c.sig !== sig) {
       if (this.facades.size > 4000) this.facades.clear();
-      c = { sig, m: facadeModel(b, isNorthRow(b.lot) ? 'back' : 'front', lotSeed(b.lot)) };
+      c = { sig, m: facadeModel(b, isNorthRow(b.lot) ? 'back' : 'front', lotSeed(b.lot), { wuxia }) };
       this.facades.set(b.id, c);
     }
     return c.m;
@@ -338,6 +342,7 @@ export class CityRenderer {
   frame(now: number, dt: number, opts: WorldOptions, me: { player: LocalPlayer; self: WorldSceneMe } | null, hl: CityHighlight): void {
     const t0 = performance.now();
     const { ctx, camera } = this;
+    this.wuxiaBuilding = opts.style === 'giangho' ? me?.self.buildingId ?? this.wuxiaBuilding : null;
     if (!this.cell) this.cell = cellCanvas(this.art);
     if (!this.plaza) this.plaza = plazaCanvas(this.art);
     this.updateAmbient(now, opts);

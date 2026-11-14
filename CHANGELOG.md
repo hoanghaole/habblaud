@@ -27,6 +27,12 @@ do meio (0.**3**.0).
   máquina de lanches, biombos de treliça nas divisórias de vidro, rolos de caligrafia e paisagens a nanquim nos
   pôsteres e quadros. As telas das mesas e a TV viram tinta sobre papel. `npx tsx scripts/wuxia-furniture-sheet.ts`
   compara os móveis dos dois estilos.
+- **Lầu các na cidade e fachada de época no escritório (“Wuxia”).** Com o estilo ligado, o seu prédio no Habblaud
+  World vira um lầu các: telhado de telhas escuras com cumeeira e pontas viradas, beiral a cada andar, colunas
+  laqueadas, janelas de treliça com papel (as acesas brilham à noite), portas vermelhas com cravos dourados,
+  lanternas e a tabuleta com o seu nome. Só na sua tela: os outros continuam vendo o prédio como o servidor manda, e
+  nada novo é enviado. No escritório, o muro externo fica laqueado, os postes da rua viram lanternas, os
+  guarda-sóis do pátio viram sombrinhas de papel oleado sobre mesas de pedra e o totem da entrada vira uma estela.
 
 ## [1.0.3] - 2026-10-16
 

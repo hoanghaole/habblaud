@@ -451,3 +451,128 @@ export function glowSprite(color: string, size = 64): HTMLCanvasElement {
   cache.set(key, { canvas: c, ax: size / 2, ay: size / 2 });
   return c;
 }
+
+// ---------------------------------------------------------------- giang hồ (wuxia)
+// Mesmas âncoras dos originais (o brilho noturno dos postes continua no lugar).
+
+const wxCache = new Map<string, PropSprite>();
+
+/** Poste com lanterna vermelha pendurada (no lugar do poste de rua). */
+function wxLanternPost(): PropSprite {
+  const [c, ctx] = makeCanvas(14, 36);
+  shadowEllipse(ctx, 5, 34, 4, 1, 0.25);
+  ctx.fillStyle = '#3e2617';
+  ctx.fillRect(4, 2, 2, 32);
+  ctx.fillStyle = '#6e4128';
+  ctx.fillRect(4, 2, 1, 32);
+  ctx.fillRect(4, 2, 7, 1);
+  ctx.fillStyle = '#3e2617';
+  ctx.fillRect(9, 3, 1, 1);
+  // lanterna
+  ctx.fillStyle = '#d9b95a';
+  ctx.fillRect(7, 3, 5, 1);
+  ctx.fillRect(7, 10, 5, 1);
+  ctx.fillStyle = '#c8322a';
+  ctx.fillRect(7, 4, 5, 6);
+  ctx.fillRect(6, 5, 7, 4);
+  ctx.fillStyle = '#ff8a5a';
+  ctx.fillRect(8, 5, 2, 3);
+  ctx.fillStyle = '#9a2420';
+  ctx.fillRect(11, 5, 1, 4);
+  ctx.fillStyle = '#c8322a';
+  ctx.fillRect(9, 11, 1, 3);
+  // base de pedra
+  ctx.fillStyle = '#8d867a';
+  ctx.fillRect(2, 32, 6, 2);
+  ctx.fillStyle = '#a9a294';
+  ctx.fillRect(2, 32, 6, 1);
+  return { canvas: c, ax: 5, ay: 34 };
+}
+
+/** Mesa de pedra com sombrinha de papel oleado (no lugar do guarda-sol). */
+function wxUmbrella(seed: number): PropSprite {
+  const [c, ctx] = makeCanvas(32, 34);
+  const palettes: [string, string, string][] = [
+    ['#c8322a', '#e25444', '#8e2f2a'],
+    ['#2f6a8e', '#4f8fb8', '#1f4a66'],
+    ['#d9a441', '#efc46a', '#a8762a'],
+  ];
+  const [a, l, dk] = palettes[seed % palettes.length];
+  shadowEllipse(ctx, 16, 29, 12, 3, 0.24);
+  // banquinhos e mesa redonda de pedra
+  ctx.fillStyle = '#7d776c';
+  ctx.fillRect(2, 24, 6, 5);
+  ctx.fillRect(24, 24, 6, 5);
+  ctx.fillStyle = '#a9a294';
+  ctx.fillRect(2, 24, 6, 2);
+  ctx.fillRect(24, 24, 6, 2);
+  ctx.fillStyle = '#9d968a';
+  ctx.fillRect(10, 24, 12, 5);
+  ctx.fillStyle = '#c4bdb0';
+  ctx.fillRect(10, 24, 12, 2);
+  // bule e xícaras
+  ctx.fillStyle = '#6b3a3a';
+  ctx.fillRect(14, 22, 4, 2);
+  ctx.fillStyle = '#e9f2ea';
+  ctx.fillRect(11, 24, 2, 1);
+  ctx.fillRect(19, 24, 2, 1);
+  // haste de bambu
+  ctx.fillStyle = '#7a5236';
+  ctx.fillRect(15, 10, 2, 14);
+  // sombrinha: disco achatado com varetas radiais
+  const p = new Painter(ctx, 32, 34);
+  const cx = 15.5;
+  const cy = 8;
+  for (let y = 0; y <= 15; y++) {
+    for (let x = 0; x < 32; x++) {
+      const dx = (x - cx) / 14.5;
+      const dy = (y - cy) / 7;
+      const d = Math.hypot(dx, dy);
+      if (d > 1) continue;
+      const ang = Math.atan2(y - cy, x - cx);
+      const rib = Math.abs(((ang + Math.PI) / (Math.PI * 2)) * 16 - Math.round(((ang + Math.PI) / (Math.PI * 2)) * 16)) < 0.12;
+      const edge = d > 0.9;
+      p.set(x, y, edge ? dk : rib ? dk : y < cy - 1 ? l : a);
+    }
+  }
+  p.set(15, 8, '#d9b95a');
+  p.set(16, 8, '#d9b95a');
+  p.flush();
+  return { canvas: c, ax: 16, ay: 29 };
+}
+
+/** Estela de pedra com o carimbo vermelho (no lugar do totem da marca). */
+function wxStele(): PropSprite {
+  const [c, ctx] = makeCanvas(14, 34);
+  shadowEllipse(ctx, 7, 32, 6, 1.5, 0.25);
+  ctx.fillStyle = '#6f6a62';
+  ctx.fillRect(2, 4, 10, 27);
+  ctx.fillRect(3, 2, 8, 2);
+  ctx.fillStyle = '#8d877d';
+  ctx.fillRect(3, 4, 8, 26);
+  ctx.fillStyle = '#a7a196';
+  ctx.fillRect(3, 4, 1, 26);
+  ctx.fillStyle = '#3a3630';
+  for (let y = 8; y < 24; y += 3) ctx.fillRect(6, y, 2, 1);
+  ctx.fillRect(5, 13, 1, 2);
+  ctx.fillRect(8, 19, 1, 2);
+  ctx.fillStyle = '#c0392b';
+  ctx.fillRect(5, 25, 4, 3);
+  // base em tartaruga estilizada
+  ctx.fillStyle = '#5f5a52';
+  ctx.fillRect(0, 30, 14, 3);
+  ctx.fillStyle = '#7d776c';
+  ctx.fillRect(0, 30, 14, 1);
+  return { canvas: c, ax: 7, ay: 32 };
+}
+
+/** Sprite giang hồ de um adereço externo, ou null para usar o original. */
+export function wuxiaPropSprite(prop: ExteriorProp): PropSprite | null {
+  if (prop.kind !== 'lamp' && prop.kind !== 'parasol' && prop.kind !== 'totem') return null;
+  const key = prop.kind === 'parasol' ? `parasol:${prop.seed % 3}` : prop.kind;
+  let s = wxCache.get(key);
+  if (s) return s;
+  s = prop.kind === 'lamp' ? wxLanternPost() : prop.kind === 'parasol' ? wxUmbrella(prop.seed) : wxStele();
+  wxCache.set(key, s);
+  return s;
+}

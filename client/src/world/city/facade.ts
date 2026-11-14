@@ -93,6 +93,8 @@ export interface FacadeModel {
   waiting: number[];
   /** Altura total do sprite (px). */
   height: number;
+  /** Estilo giang hồ (só o prédio do próprio dono, só neste computador): lầu các de madeira laqueada. */
+  wuxia?: boolean;
 }
 
 /** Altura (px) do prédio com `floors` andares desenhados. */
@@ -117,7 +119,7 @@ export function windowOrder(variant: number, count: number): number[] {
  * piscam (as próximas na ordem, ao menos uma se alguém espera); `away` apaga tudo; modo discreto (sem `agents`) acende
  * metade, sem piscar.
  */
-export function facadeModel(b: Pick<WorldBuildingPublic, 'floors' | 'state' | 'theme' | 'agents'>, side: FacadeSide, seed: number): FacadeModel {
+export function facadeModel(b: Pick<WorldBuildingPublic, 'floors' | 'state' | 'theme' | 'agents'>, side: FacadeSide, seed: number, opts: { wuxia?: boolean } = {}): FacadeModel {
   const floors = Number.isFinite(b.floors) ? Math.max(0, Math.floor(b.floors)) : 0;
   const drawn = Math.min(FACADE.maxFloors, floors);
   const plus = Math.max(0, floors - FACADE.maxFloors);
@@ -145,12 +147,12 @@ export function facadeModel(b: Pick<WorldBuildingPublic, 'floors' | 'state' | 't
   const lit = order.slice(0, litN);
   const waiting = order.slice(litN, Math.min(count, litN + waitingN));
   const theme: WorldTheme = b.theme === 'halloween' || b.theme === 'christmas' ? b.theme : 'none';
-  return { side, variant, style: variant % FACADE_STYLES.length, drawn, plus, state, theme, discreet, litLevel, lit, waiting, height: facadeHeight(drawn) };
+  return { side, variant, style: variant % FACADE_STYLES.length, drawn, plus, state, theme, discreet, litLevel, lit, waiting, height: facadeHeight(drawn), ...(opts.wuxia ? { wuxia: true } : {}) };
 }
 
 /** Chave do cache do sprite (tudo o que muda o desenho; o nome, a bandeira e os likes ficam fora: são texto na tela). */
 export function facadeKey(m: FacadeModel): string {
-  return `${m.side}|${m.variant}|${m.drawn}|${Math.min(99, m.plus)}|${m.state}|${m.theme}|${m.litLevel}`;
+  return `${m.side}|${m.variant}|${m.drawn}|${Math.min(99, m.plus)}|${m.state}|${m.theme}|${m.litLevel}${m.wuxia ? '|wx' : ''}`;
 }
 
 /** Retângulo (px, no sprite) da janela `i` da grade desenhada (andar 0 = o de baixo). */
@@ -258,6 +260,14 @@ function paintFacade(m: FacadeModel): FacadeSprites {
   ctx.fillStyle = 'rgba(28,36,52,0.12)';
   ctx.fillRect(fw, 10, 2, H - 10);
 
+  if (m.wuxia) {
+    paintWuxia(ctx, gctx, m, groundTop, on);
+    paintTheme(ctx, gctx, m, groundTop);
+    if (!on) paintClosedSign(ctx, fw / 2, m.side === 'front' ? groundTop + 16 : 1);
+    paintPlus(ctx, gctx, st, m, on);
+    return { canvas: c, glow: g, w: W, h: H };
+  }
+
   // ---- paredes dos andares e térreo
   paintWall(ctx, st, 0, faceTop, fw, H - faceTop, rng);
   // lajes entre andares e pilares nas pontas
@@ -305,7 +315,13 @@ function paintFacade(m: FacadeModel): FacadeSprites {
   // fechado: tabuleta na porta (na frente) ou na marquise (nos fundos), por cima de tudo
   if (!on) paintClosedSign(ctx, fw / 2, m.side === 'front' ? groundTop + 16 : 1);
 
-  // ---- placa "+N" no telhado
+  paintPlus(ctx, gctx, st, m, on);
+  return { canvas: c, glow: g, w: W, h: H };
+}
+
+/** Placa "+N" no telhado (andares além dos desenhados). */
+function paintPlus(ctx: Ctx, gctx: Ctx, st: FacadeStyle, m: FacadeModel, on: boolean): void {
+  const fw = FACADE.w;
   if (m.plus > 0) {
     const text = `+${Math.min(99, m.plus)}`;
     const tw = pixelTextWidth(text);
@@ -321,7 +337,152 @@ function paintFacade(m: FacadeModel): FacadeSprites {
       pixelText(gctx, text, px, py, '#fff6dc');
     }
   }
-  return { canvas: c, glow: g, w: W, h: H };
+}
+
+// ---------------------------------------------------------------- giang hồ (lầu các)
+
+const WX = {
+  plaster: ['#d9cbb0', '#e8dcc0', '#f2e8d2'] as const,
+  lacquer: ['#5e1c19', '#8e2f2a', '#b8473c'] as const,
+  tile: ['#2e333d', '#3c4350', '#58606e', '#76808f'] as const,
+  gold: '#d9b95a',
+  paper: ['#b8a47a', '#d4c39a'] as const,
+};
+
+/**
+ * Lầu các: reboco claro entre colunas laqueadas, um beiral de telhas a cada andar, janelas de treliça com papel
+ * (acesas = papel iluminado por dentro), telhado de telhas escuras com cumeeira e pontas viradas para cima; no térreo
+ * da frente, portas vermelhas com cravos dourados, lanternas e a tabuleta (hoành phi) onde a cena escreve o nome.
+ */
+function paintWuxia(ctx: Ctx, g: Ctx, m: FacadeModel, groundTop: number, on: boolean): void {
+  const fw = FACADE.w;
+  const faceTop = FACADE.roof;
+  const H = m.height;
+  // Paredes.
+  rect(ctx, 0, faceTop, fw, H - faceTop, WX.plaster[1]);
+  for (let y = faceTop; y < H; y += 2) rect(ctx, 0, y, fw, 1, (y >> 1) % 3 ? WX.plaster[1] : WX.plaster[2]);
+  // Colunas laqueadas nas pontas e entre grupos de janelas.
+  const cols = [0, fw - 4];
+  for (let c = 2; c < FACADE.cols; c += 3) cols.push(FACADE.winX + c * FACADE.winPitch + FACADE.winW + 1);
+  for (const x of cols) {
+    rect(ctx, x, faceTop, 4, H - faceTop, WX.lacquer[1]);
+    rect(ctx, x, faceTop, 1, H - faceTop, WX.lacquer[2]);
+    rect(ctx, x + 3, faceTop, 1, H - faceTop, WX.lacquer[0]);
+  }
+  // Janelas de treliça (mesmas posições: o pisca-pisca de "esperando" cai em cima delas).
+  const litSet = new Set(m.lit);
+  for (let i = 0; i < m.drawn * FACADE.cols; i++) {
+    const r = windowRect(m, i);
+    const lit = litSet.has(i);
+    rect(ctx, r.x - 1, r.y - 1, r.w + 2, r.h + 2, WX.lacquer[0]);
+    rect(ctx, r.x, r.y, r.w, r.h, lit ? WARM[2] : WX.paper[(m.variant + i) % 2]!);
+    const bar = lit ? '#a8582a' : '#6e4128';
+    for (let x = r.x + 2; x < r.x + r.w; x += 3) rect(ctx, x, r.y, 1, r.h, bar);
+    rect(ctx, r.x, r.y + 3, r.w, 1, bar);
+    if (lit) {
+      g.fillStyle = 'rgba(255,200,120,0.85)';
+      g.fillRect(r.x, r.y, r.w, r.h);
+      g.fillStyle = 'rgba(255,190,110,0.3)';
+      g.fillRect(r.x - 1, r.y - 1, r.w + 2, r.h + 2);
+    }
+  }
+  // Beiral de telhas entre os andares (no vão entre as fileiras de janelas), com as pontas levantadas.
+  const eave = (y: number) => {
+    rect(ctx, 0, y - 3, fw, 1, WX.tile[0]);
+    rect(ctx, 0, y - 2, fw, 1, WX.tile[1]);
+    for (let x = (y & 1); x < fw; x += 2) rect(ctx, x, y - 2, 1, 1, WX.tile[2]);
+    rect(ctx, 0, y - 1, fw, 1, WX.tile[3]);
+    rect(ctx, 0, y, fw, 1, 'rgba(40,24,16,0.35)');
+    for (const [x, dir] of [[0, 1], [fw - 1, -1]] as const) {
+      rect(ctx, x, y - 5, 1, 2, WX.tile[0]);
+      rect(ctx, x + dir, y - 4, 1, 1, WX.tile[0]);
+      rect(ctx, x, y - 6, 1, 1, WX.gold);
+    }
+  };
+  for (let k = 1; k < m.drawn; k++) eave(faceTop + k * FACADE.floor + 1);
+  // Telhado visto de cima: telhas em fileiras, cumeeira, acrotérios nas pontas e o beiral grosso da frente.
+  rect(ctx, 0, 2, fw, faceTop - 2, WX.tile[1]);
+  for (let y = 4; y < faceTop - 2; y += 3) {
+    rect(ctx, 0, y, fw, 1, WX.tile[2]);
+    for (let x = (y % 2) * 3; x < fw; x += 6) rect(ctx, x, y + 1, 1, 2, WX.tile[0]);
+  }
+  rect(ctx, 6, 5, fw - 12, 3, WX.tile[0]);
+  rect(ctx, 6, 5, fw - 12, 1, WX.tile[3]);
+  for (const x of [4, fw - 8]) {
+    rect(ctx, x, 1, 4, 5, WX.tile[0]);
+    rect(ctx, x + (x < fw / 2 ? 0 : 3), 0, 1, 2, WX.tile[3]);
+  }
+  rect(ctx, fw / 2 - 3, 2, 6, 3, WX.gold);
+  rect(ctx, fw / 2 - 1, 0, 2, 2, WX.lacquer[1]);
+  rect(ctx, 0, faceTop - 3, fw, 3, WX.tile[0]);
+  rect(ctx, 0, faceTop - 3, fw, 1, WX.tile[3]);
+  // Pontas viradas (đầu đao) nos cantos do beiral principal.
+  for (let i = 0; i < 5; i++) {
+    rect(ctx, i, faceTop - 4 - i, 2, 1, WX.tile[0]);
+    rect(ctx, fw - 2 - i, faceTop - 4 - i, 2, 1, WX.tile[0]);
+  }
+  rect(ctx, 5, faceTop - 10, 1, 2, WX.gold);
+  rect(ctx, fw - 6, faceTop - 10, 1, 2, WX.gold);
+
+  // Térreo.
+  rect(ctx, 0, groundTop, fw, FACADE.ground, WX.plaster[0]);
+  if (m.drawn > 0) eave(groundTop + 1);
+  rect(ctx, 0, H - 3, fw, 3, '#9d968a');
+  rect(ctx, 0, H - 3, fw, 1, '#b8b0a0');
+  if (m.side === 'front') {
+    // Tabuleta laqueada com moldura dourada (o nome do dono é escrito por cima pela cena).
+    const sr = signRect(m);
+    rect(ctx, sr.x - 2, sr.y - 1, sr.w + 4, sr.h + 2, WX.gold);
+    rect(ctx, sr.x - 1, sr.y, sr.w + 2, sr.h, WX.lacquer[0]);
+    // Portas duplas com cravos dourados.
+    const dx = fw / 2 - 12;
+    const dy = groundTop + 12;
+    rect(ctx, dx - 2, dy - 2, 28, H - 3 - dy + 2, WX.lacquer[0]);
+    for (const x of [dx, dx + 12]) {
+      rect(ctx, x, dy, 12, H - 3 - dy, WX.lacquer[1]);
+      rect(ctx, x, dy, 1, H - 3 - dy, WX.lacquer[2]);
+      for (let yy = dy + 2; yy < H - 5; yy += 3) for (let xx = x + 2; xx < x + 11; xx += 3) rect(ctx, xx, yy, 1, 1, WX.gold);
+    }
+    rect(ctx, dx + 11, dy, 2, H - 3 - dy, WX.lacquer[0]);
+    if (!on) rect(ctx, dx, dy, 24, H - 3 - dy, 'rgba(20,16,24,0.25)');
+    // Janelas de treliça do térreo.
+    for (const x of [18, 42, fw - 60, fw - 36]) {
+      rect(ctx, x - 1, groundTop + 13, 18, 11, WX.lacquer[0]);
+      rect(ctx, x, groundTop + 14, 16, 9, on ? WARM[1] : WX.paper[0]);
+      for (let xx = x + 2; xx < x + 16; xx += 3) rect(ctx, xx, groundTop + 14, 1, 9, '#6e4128');
+      rect(ctx, x, groundTop + 18, 16, 1, '#6e4128');
+      if (on) {
+        g.fillStyle = 'rgba(255,200,120,0.75)';
+        g.fillRect(x, groundTop + 14, 16, 9);
+      }
+    }
+    // Lanternas dos dois lados da porta.
+    for (const cx of [dx - 7, dx + 31]) {
+      rect(ctx, cx, groundTop + 1, 1, 3, '#3e2617');
+      rect(ctx, cx - 2, groundTop + 4, 5, 6, '#c8322a');
+      rect(ctx, cx - 3, groundTop + 5, 7, 4, '#c8322a');
+      rect(ctx, cx - 2, groundTop + 5, 2, 3, '#e25444');
+      rect(ctx, cx - 1, groundTop + 3, 3, 1, WX.gold);
+      rect(ctx, cx - 1, groundTop + 10, 3, 1, WX.gold);
+      rect(ctx, cx, groundTop + 11, 1, 3, '#c8322a');
+      if (on) {
+        for (const [r, al] of [[6, 0.18], [4, 0.3], [3, 0.45]] as const) {
+          g.fillStyle = `rgba(255,140,90,${al})`;
+          g.fillRect(cx - r, groundTop + 7 - r, r * 2 + 1, r * 2 + 1);
+        }
+        g.fillStyle = 'rgba(255,220,170,0.95)';
+        g.fillRect(cx - 1, groundTop + 6, 2, 2);
+      }
+    }
+  } else {
+    // Fundos: tabuleta no telhado (onde a cena escreve o nome) e uma portinha de serviço.
+    const sr = signRect(m);
+    rect(ctx, sr.x - 2, sr.y - 1, sr.w + 4, sr.h + 2, WX.gold);
+    rect(ctx, sr.x - 1, sr.y, sr.w + 2, sr.h, WX.lacquer[0]);
+    rect(ctx, fw / 2 - 7, groundTop + 10, 14, H - 3 - groundTop - 10, WX.lacquer[1]);
+    rect(ctx, fw / 2 - 7, groundTop + 10, 1, H - 3 - groundTop - 10, WX.lacquer[2]);
+    rect(ctx, fw / 2 + 4, groundTop + 18, 1, 2, WX.gold);
+  }
 }
 
 function paintWall(ctx: Ctx, st: FacadeStyle, x: number, y: number, w: number, h: number, rng: () => number): void {

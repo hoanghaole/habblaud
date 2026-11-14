@@ -79,3 +79,22 @@ describe('fachada', () => {
     expect(facadeKey(c)).not.toBe(facadeKey(a));
   });
 });
+
+describe('fachada giang hồ (só o meu prédio, só na minha tela)', () => {
+  const b = { floors: 5, state: 'online' as const, theme: 'none' as const, agents: agents(6, 3, 1) };
+  it('sem a opção, o modelo é exatamente o de sempre', () => {
+    const m = facadeModel(b, 'front', 7);
+    expect('wuxia' in m).toBe(false);
+    expect(facadeKey(m)).toBe(facadeKey(facadeModel(b, 'front', 7, {})));
+  });
+  it('com a opção, mesmas janelas e placa, mas outra chave de cache', () => {
+    const plain = facadeModel(b, 'front', 7);
+    const wx = facadeModel(b, 'front', 7, { wuxia: true });
+    expect(wx.wuxia).toBe(true);
+    expect(wx.lit).toEqual(plain.lit);
+    expect(wx.waiting).toEqual(plain.waiting);
+    expect(wx.height).toBe(plain.height);
+    expect(signRect(wx)).toEqual(signRect(plain));
+    expect(facadeKey(wx)).not.toBe(facadeKey(plain));
+  });
+});
