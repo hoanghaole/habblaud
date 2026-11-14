@@ -8,3 +8,10 @@ scripts/assets/.cache/
 
 # Configurações locais do Claude Code e caches de geração
 .claude/
+
+# Private deployment credentials, live metadata and local verification artifacts
+.cloudflare/
+openclaw-snapshots/
+outputs/
+access-schema.local.json
+policy-schema.local.json
