@@ -19,11 +19,15 @@ export interface WorldOptions {
   daylight?: DaylightMode;
   /** Tema visual: automático (segue o calendário; ver seasonalThemeFor), nenhum, Natal ou Halloween. */
   theme?: OfficeTheme;
+  /** (Opcional, aditivo) Estilo do escritório: o moderno original ou giang hồ (wuxia). Só local: não vai ao World. */
+  style?: OfficeStyle;
 }
 
 /** Tema que o renderer desenha: o escritório original ('none') ou um dos sazonais. */
 export type SeasonalTheme = 'none' | 'christmas' | 'halloween';
 export type OfficeTheme = 'auto' | SeasonalTheme;
+/** Estilo do escritório, independente do tema sazonal. */
+export type OfficeStyle = 'modern' | 'giangho';
 
 /**
  * Tema desenhado numa data (hora local). No automático: Halloween de 1º a 31 de outubro, Natal de 1º de novembro a
@@ -155,4 +159,5 @@ export const DEFAULT_WORLD_OPTIONS: WorldOptions = {
   followSelected: false,
   dayNight: true,
   theme: 'auto',
+  style: 'modern',
 };

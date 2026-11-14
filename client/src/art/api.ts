@@ -135,6 +135,8 @@ export interface CharacterFrameRequest {
   seated?: boolean;
   /** Acessório sazonal; ausente mantém a aparência original. */
   costume?: 'santa' | 'witch' | 'pumpkin' | 'vampire';
+  /** Estilo do escritório: 'giangho' veste o personagem como um herói wuxia (e ignora `costume`). */
+  style?: 'giangho';
 }
 
 export type FurnitureKind =

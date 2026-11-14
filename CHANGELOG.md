@@ -10,6 +10,16 @@ do meio (0.**3**.0).
 
 ## [Não lançado]
 
+### Adicionado
+
+- **Estilo do escritório “Wuxia” (giang hồ).** Em **Configurações › Aparência › Estilo do escritório**, os agentes
+  viram heróis de capa e espada: espadachins com faixa na testa e espada nas costas, monges de cabeça raspada e
+  kasaya, taoistas de coroa e espanador, mendigos com cabaça, heroínas com grampo no cabelo e letrados de gorro com
+  hastes. A escola sai da aparência (sempre a mesma para o mesmo personagem), a túnica tem gola cruzada e faixa na
+  cintura, e café, notebook, papéis e celular viram chá, rolo de bambu, pergaminho e leque. Subagentes são discípulos
+  de túnica curta, com a cor do crachá na faixa. Vale só neste computador (não vai ao Habblaud World) e combina com
+  os temas sazonais; `npx tsx scripts/wuxia-sheet.ts` gera uma folha comparando os dois estilos.
+
 ## [1.0.3] - 2026-10-16
 
 ### Corrigido

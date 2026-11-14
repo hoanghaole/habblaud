@@ -2,7 +2,7 @@
 // ordenadas por profundidade -> luz/escuridão -> ícones. A passada em espaço de tela (texto
 // nítido) fica em overlay.ts.
 import { TILE, type ArtModule, type CharacterFrameRequest, type IconName, type ScreenMode, type Sprite } from '../../art/api';
-import type { SeasonalTheme, WorldOptions } from '../api';
+import type { OfficeStyle, SeasonalTheme, WorldOptions } from '../api';
 import type { WorldAssets } from '../assets';
 import type { Camera } from '../camera';
 import { BUILDING_H, COL_W, CORE_COLS, CORRIDOR_Y } from '../constants';
@@ -116,6 +116,7 @@ export class Renderer {
   private clearColor = '#7fae62';
   private grass: CanvasPattern | null = null;
   private theme: SeasonalTheme = 'none';
+  private style: OfficeStyle = 'modern';
 
   constructor(
     readonly canvas: HTMLCanvasElement,
@@ -136,7 +137,8 @@ export class Renderer {
   // =================================================================== sincronização com a simulação
 
   /** Mantém caches e visuais coerentes com o prédio atual. */
-  sync(theme: SeasonalTheme = 'none'): void {
+  sync(theme: SeasonalTheme = 'none', style: OfficeStyle = 'modern'): void {
+    this.style = style;
     const sim = this.sim;
     const themeChanged = theme !== this.theme;
     this.theme = theme;
@@ -844,6 +846,7 @@ export class Renderer {
     req.held = ch.held;
     req.seated = ch.seated;
     req.costume = seasonalCostume(this.theme, ch.info.seed);
+    req.style = this.style === 'giangho' ? 'giangho' : undefined;
     try {
       sprite = this.charSprite(req, ch.animT);
     } catch {
@@ -1047,6 +1050,7 @@ export class Renderer {
       req.held = ch.pose === 'groom' ? ch.held : 'none';
       req.seated = false;
       req.costume = seasonalCostume(this.theme, ch.info.seed);
+    req.style = this.style === 'giangho' ? 'giangho' : undefined;
       let s: Sprite;
       try {
         s = this.charSprite(req, ch.animT);

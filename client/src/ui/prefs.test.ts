@@ -54,8 +54,13 @@ describe('preferências', () => {
     expect(() => savePrefs(broken, DEFAULT_PREFS)).not.toThrow();
   });
   it('extrai só as opções do mundo', () => {
-    expect(worldOptionsFrom({ ...DEFAULT_PREFS, daylight: 'day' })).toEqual({ showNames: true, bubbles: 'important', liveliness: 'normal', dayNight: false, daylight: 'day', theme: 'auto' });
+    expect(worldOptionsFrom({ ...DEFAULT_PREFS, daylight: 'day' })).toEqual({ showNames: true, bubbles: 'important', liveliness: 'normal', dayNight: false, daylight: 'day', theme: 'auto', style: 'modern' });
     expect(worldOptionsFrom({ ...DEFAULT_PREFS, daylight: 'night' })).toMatchObject({ dayNight: true, daylight: 'night' });
+  });
+  it('estilo do escritório: moderno por padrão, giang hồ quando escolhido, lixo cai no padrão', () => {
+    expect(DEFAULT_PREFS.style).toBe('modern');
+    expect(sanitizePrefs({ style: 'giangho' }).style).toBe('giangho');
+    expect(sanitizePrefs({ style: 'medieval' }).style).toBe('modern');
   });
   it('ciclo dia/noite: valida o modo e migra o interruptor antigo', () => {
     expect(DEFAULT_PREFS.daylight).toBe('auto');

@@ -6,6 +6,7 @@ import { luminance, mix, ramp, shade, type Ramp } from '../core/color';
 import { PixelBuf, type Palette } from '../core/pixbuf';
 import type { BufSprite } from '../core/sprite';
 import { HAIR, HEAD_BASE, TEXTURED, type HeadView, type Tpl } from './hair';
+import { drawBackGear, drawRobeSkirt, drawRobeTorso, drawWuxiaHead, drawWuxiaItem, wuxiaLook, type WuxiaLook, type WxCtx } from './wuxia';
 
 export const CHAR_W = 24;
 export const CHAR_H = 34;
@@ -592,6 +593,13 @@ interface Dc {
   a: Appearance;
   p: CharPal;
   r: Rig;
+  /** Estilo giang hồ (wuxia): túnica, chapéus e itens de época por cima do rig normal. */
+  wx?: WuxiaLook;
+}
+
+function wxCtx(dc: Dc, look: WuxiaLook): WxCtx {
+  const r = dc.r;
+  return { b: dc.b, view: r.view, ub: r.ub, lean: r.lean, seated: r.seated, look, skin: dc.p.skin, ox: HX + r.lean, oy: HY + r.ub + r.hd };
 }
 
 function hairPalette(p: CharPal, buzz: boolean): Palette {
@@ -915,6 +923,11 @@ function sleeveLength(a: Appearance): number {
 }
 
 function drawLegs(dc: Dc): void {
+  drawLegsBase(dc);
+  if (dc.wx) drawRobeSkirt(wxCtx(dc, dc.wx));
+}
+
+function drawLegsBase(dc: Dc): void {
   const { b, p, r, a } = dc;
   const pants = p.bottom;
   const sh = p.shoes;
@@ -1055,6 +1068,10 @@ function drawLegsSide(dc: Dc, pants: Ramp, sh: Ramp, skinLeg: boolean): void {
 }
 
 function drawTorso(dc: Dc): void {
+  if (dc.wx) {
+    drawRobeTorso(wxCtx(dc, dc.wx));
+    return;
+  }
   const { b, p, r, a } = dc;
   const y = 18 + r.ub;
   const t = p.top;
@@ -1248,6 +1265,7 @@ function drawItem(dc: Dc, x: number, y: number): void {
   const { b, r } = dc;
   const it = r.held;
   const side = r.view === 'side';
+  if (dc.wx && drawWuxiaItem(b, it, x, y, r.view)) return;
   switch (it) {
     case 'coffee':
       b.stamp(MUG, x, y, { w: '#f4f2ee', c: '#6b4226', r: '#e2604f', h: '#cfcac0', o: '#f4f2ee' }, side);
@@ -1485,6 +1503,10 @@ function itemPos(dc: Dc): Pt | null {
 
 /** Usa o mesmo rig da cabeça para acompanhar quique, cochilo e poses sentadas. */
 function drawCostume(dc: Dc, costume: CharacterFrameRequest['costume']): void {
+  if (dc.wx) {
+    drawWuxiaHead(wxCtx(dc, dc.wx));
+    return;
+  }
   if (!costume) return;
   const { b, r } = dc;
   const x = HX + r.lean;
@@ -1524,15 +1546,17 @@ export function renderCharacter(req: CharacterFrameRequest): BufSprite {
   }
   const view: HeadView = req.dir === 'up' ? 'up' : req.dir === 'down' ? 'down' : 'side';
   const b = new PixelBuf(CHAR_W, CHAR_H);
-  const a = req.appearance;
-  const dc: Dc = { b, a, p: paletteOf(a), r: makeRig(req, view) };
+  const wx = req.style === 'giangho' ? wuxiaLook(req.appearance) : undefined;
+  const a = wx ? wx.appearance : req.appearance;
+  const dc: Dc = { b, a, p: paletteOf(a), r: makeRig(req, view), wx };
   const r = dc.r;
   const sleeve = sleeveLength(a);
   const sr = dc.p.top;
   const ip = itemPos(dc);
 
-  // 1) Atrás de tudo: cabelo longo (frente), item nas costas.
-  if (req.costume === 'vampire') {
+  // 1) Atrás de tudo: cabelo longo (frente), item nas costas, espada de perfil.
+  if (wx) drawBackGear(wxCtx(dc, wx), 'behind');
+  if (req.costume === 'vampire' && !wx) {
     b.rect(5 + r.lean, 18 + r.ub, 14, 8, '#35283e');
     b.rect(6 + r.lean, 19 + r.ub, 12, 6, '#702743');
   }

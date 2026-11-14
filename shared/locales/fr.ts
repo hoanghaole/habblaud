@@ -2156,6 +2156,10 @@ export const FR: Readonly<Record<string, string>> = {
 
   // client/src/ui/settings.ts
   "Tema do escritório": "Thème du bureau",
+  "Estilo do escritório": "Style du bureau",
+  "Moderno": "Moderne",
+  "Wuxia": "Wuxia",
+  "Wuxia: os agentes viram heróis de capa e espada (espadachins, monges, taoistas, mendigos, heroínas e letrados). Só neste computador.": "Wuxia : les agents deviennent des héros d'arts martiaux (épéistes, moines, taoïstes, mendiants, héroïnes et lettrés). Sur cet ordinateur seulement.",
   "Natal": "Noël",
   "Halloween": "Halloween",
   "Automático: Halloween em outubro e Natal de 1º de novembro a 26 de dezembro; no resto do ano, o visual original. Nenhum: sempre o original.": "Automatique : Halloween en octobre et Noël du 1er novembre au 26 décembre ; le reste de l'année, l'apparence d'origine. Aucun : toujours l'original.",
