@@ -12,6 +12,10 @@ do meio (0.**3**.0).
 
 ### Adicionado
 
+- **Interface em vietnamita.** **Configurações › Idioma** ganha o **Tiếng Việt**, com todos os textos traduzidos (e o
+  navegador ou o sistema em `vi` já abre nele; no servidor, `HABBLAUD_LANG=vi`). O estilo “Wuxia” vira **Kiếm hiệp**,
+  com as áreas comuns de época (Khách điếm, Trà thất, Đình viện, Tịnh phòng). O Habblaud World ainda não tem
+  vietnamita: os e-mails e avisos da conta vão em inglês.
 - **Estilo do escritório “Wuxia” (giang hồ).** Em **Configurações › Aparência › Estilo do escritório**, os agentes
   viram heróis de capa e espada: espadachins com faixa na testa e espada nas costas, monges de cabeça raspada e
   kasaya, taoistas de coroa e espanador, mendigos com cabaça, heroínas com grampo no cabelo e letrados de gorro com

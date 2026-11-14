@@ -8,8 +8,9 @@
 //   serverLocale).
 // Os textos de atividade são montados pelo servidor, então seguem o idioma do servidor.
 import { DICTIONARIES } from './locales/all';
+import { WORLD_LOCALES, type WorldLocale } from './world/protocol';
 
-export type Locale = 'pt-BR' | 'en' | 'es' | 'fr';
+export type Locale = 'pt-BR' | 'en' | 'es' | 'fr' | 'vi';
 
 /** Na ordem do seletor; o nome de cada idioma vai na própria língua, para quem não entende o idioma atual. */
 export const LOCALES: { id: Locale; name: string }[] = [
@@ -17,6 +18,7 @@ export const LOCALES: { id: Locale; name: string }[] = [
   { id: 'en', name: 'English' },
   { id: 'es', name: 'Español' },
   { id: 'fr', name: 'Français' },
+  { id: 'vi', name: 'Tiếng Việt' },
 ];
 
 /** Chave da preferência salva no navegador. */
@@ -38,6 +40,7 @@ export function normalizeLocale(v: string | null | undefined): Locale | undefine
   if (s === 'pt' || s.startsWith('pt-')) return 'pt-BR';
   if (s === 'en' || s.startsWith('en-')) return 'en';
   if (s === 'es' || s.startsWith('es-')) return 'es';
+  if (s === 'vi' || s.startsWith('vi-')) return 'vi';
   return undefined;
 }
 
@@ -111,7 +114,15 @@ export function tr(src: string, args?: readonly unknown[]): string {
   return s.replace(/\{(\d+)\}/g, (m, i: string) => (Number(i) < args.length ? String(args[Number(i)]) : m));
 }
 
+/**
+ * Idioma para o Habblaud World (e-mails e avisos da conta). O mundo só conhece WORLD_LOCALES: um idioma da interface
+ * que ele ainda não tem (o vietnamita) vai como inglês, senão o servidor recusa o cadastro.
+ */
+export function worldLocale(l: Locale = current): WorldLocale {
+  return (WORLD_LOCALES as readonly string[]).includes(l) ? (l as WorldLocale) : 'en';
+}
+
 /** Idioma no formato do Intl (datas, números). */
 export function intlLocale(): string {
-  return current === 'fr' ? 'fr-FR' : current === 'en' ? 'en-US' : current === 'es' ? 'es' : 'pt-BR';
+  return current === 'vi' ? 'vi-VN' : current === 'fr' ? 'fr-FR' : current === 'en' ? 'en-US' : current === 'es' ? 'es' : 'pt-BR';
 }

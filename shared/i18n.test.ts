@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { getLocale, intlLocale, normalizeLocale, serverLocale, setLocale, tr } from './i18n';
+import { getLocale, intlLocale, normalizeLocale, serverLocale, setLocale, tr, worldLocale } from './i18n';
 import { EN } from './locales/en';
 import { ES } from './locales/es';
 import { FR } from './locales/fr';
+import { VI } from './locales/vi';
 
 const placeholders = (s: string) => new Set(s.match(/\{\w+\}/g) ?? []);
 
@@ -17,6 +18,10 @@ describe('i18n', () => {
     expect(normalizeLocale('fr')).toBe('fr');
     expect(normalizeLocale('fr-CA')).toBe('fr');
     expect(normalizeLocale('fr_FR.UTF-8')).toBe('fr');
+    expect(normalizeLocale('vi')).toBe('vi');
+    expect(normalizeLocale('vi_VN.UTF-8')).toBe('vi');
+    expect(worldLocale('vi')).toBe('en');
+    expect(worldLocale('fr')).toBe('fr');
     expect(normalizeLocale('pt')).toBe('pt-BR');
     expect(normalizeLocale('pt_PT')).toBe('pt-BR');
     expect(normalizeLocale('en-US')).toBe('en');
@@ -63,7 +68,7 @@ describe('i18n', () => {
   });
 
   it('nenhuma tradução fica vazia nem perde ou inventa lacunas', () => {
-    for (const [lang, dict] of Object.entries({ en: EN, es: ES, fr: FR })) {
+    for (const [lang, dict] of Object.entries({ en: EN, es: ES, fr: FR, vi: VI })) {
       for (const [pt, t] of Object.entries(dict)) {
         expect(t.trim(), `${lang}: ${pt}`).not.toBe('');
         const original = placeholders(pt);
