@@ -15,6 +15,8 @@ import { buildAnim } from './anim';
 import { drawFxBanner } from './github-fx';
 import type { HeadInfo, Renderer } from './renderer';
 import { tr } from '../../../../shared/i18n';
+import type { OfficeStyle } from '../api';
+import { coreAreaName } from '../area-names';
 
 // A Pixelify Sans tem o "C" maiúsculo quase fechado (lê-se "Oopa" em vez de "Copa") em qualquer
 // peso/tamanho usado no canvas; os textos do mundo usam a fonte do sistema, sempre legível.
@@ -46,12 +48,6 @@ export const TINY_ZOOM = 0.6;
 const OVERVIEW_PER_ROOM = 1;
 const OVERVIEW_TOTAL = 4;
 
-const CORE_NAMES: Record<string, string> = {
-  'core:recepcao': tr('Recepção'),
-  'core:banheiros': tr('Banheiros'),
-  'core:copa': tr('Copa'),
-  'core:lounge': tr('Lounge'),
-};
 
 /** 'shell' = espera de shell: balão escuro de terminal com texto verde. 'say' = fala das rodas (papo, torcida, apostas). */
 type Tone = 'info' | 'alert' | 'deliver' | 'shell' | 'say';
@@ -183,6 +179,8 @@ export function rationBubbles(items: readonly { room: string; prio: number; chan
 }
 
 export class Overlay {
+  /** Estilo do escritório (nomes de época nas áreas comuns no giang hồ). */
+  private style: OfficeStyle | undefined;
   private widths = new Map<string, number>();
   private fitted = new Map<string, string>();
   private placed: number[] = [];
@@ -268,6 +266,7 @@ export class Overlay {
   }
 
   draw(now: number, opts: WorldOptions, sel: { agent: string | null; room: string | null; hover: string | null }): void {
+    this.style = opts.style;
     const { ctx, camera } = this;
     const dpr = camera.dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -439,8 +438,9 @@ export class Overlay {
         // endereço antigo de uma mudança: o nome já está na sala nova
         if (!room.present || room.ghost || (anim && anim.walls < 0.6)) continue;
         this.drawRoomPill(room.info.name, cx, cy, colW - 8, room.accounts, this.countIn(room.id), room.theme.accent, room.lightOn);
-      } else if (CORE_NAMES[vis.id]) {
-        this.drawCorePill(CORE_NAMES[vis.id], cx, cy, colW - 8);
+      } else {
+        const name = coreAreaName(vis.id, this.style);
+        if (name) this.drawCorePill(name, cx, cy, colW - 8);
       }
     }
   }

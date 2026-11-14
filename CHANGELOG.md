@@ -33,6 +33,8 @@ do meio (0.**3**.0).
   lanternas e a tabuleta com o seu nome. Só na sua tela: os outros continuam vendo o prédio como o servidor manda, e
   nada novo é enviado. No escritório, o muro externo fica laqueado, os postes da rua viram lanternas, os
   guarda-sóis do pátio viram sombrinhas de papel oleado sobre mesas de pedra e o totem da entrada vira uma estela.
+- **Áreas comuns com nome de época (“Wuxia”).** Com o estilo ligado, a recepção vira a Estalagem, a copa a Casa de
+  chá, o lounge o Pavilhão e os banheiros a Casa de banhos, nos rótulos do mapa e no feed (“ganhou no Pavilhão”).
 
 ## [1.0.3] - 2026-10-16
 

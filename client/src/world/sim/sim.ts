@@ -142,6 +142,11 @@ export class Sim {
   /** Visita: as luzes do prédio (aplicadas a cada snapshot e a cada segundo). */
   visitLight: VisitLight = 'live';
 
+  /** Estilo do escritório escolhido (os nomes de época das áreas comuns no feed). */
+  style(): WorldOptions['style'] {
+    return this.options().style;
+  }
+
   /** `storage` das carteiras: null = só em memória (o timelapse não mexe nas moedinhas de verdade). */
   constructor(
     private readonly art: ArtModule,
