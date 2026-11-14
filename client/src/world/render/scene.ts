@@ -5,8 +5,9 @@ import { hash32 } from '../../../../shared/hash';
 import type { AreaLayout, WallItemPlacement, WallSegment } from '../layout/types';
 import type { RoomState } from '../sim/room-state';
 import type { WallArtAsset, WorldAssets } from '../assets';
-import type { SeasonalTheme } from '../api';
+import type { OfficeStyle, SeasonalTheme } from '../api';
 import { decorateSeasonalRug, decorateSeasonalWall, seasonalRugColor, seasonalWallStyle } from './seasonal';
+import { decorateWuxiaWalls } from './wuxia';
 
 /** Margem acima da área no cache de paredes (itens que passam do topo da face). */
 export const WALL_MARGIN = 16;
@@ -209,7 +210,8 @@ function tintFloor(ctx: CanvasRenderingContext2D, px: { x: number; y: number; w:
   ctx.restore();
 }
 
-export function buildAreaVis(art: ArtModule, layout: AreaLayout, room: RoomState | undefined, assets: WorldAssets | null, theme: SeasonalTheme = 'none'): AreaVis {
+export function buildAreaVis(art: ArtModule, layout: AreaLayout, room: RoomState | undefined, assets: WorldAssets | null, theme: SeasonalTheme = 'none', style: OfficeStyle = 'modern'): AreaVis {
+  const wx = style === 'giangho';
   const r = layout.rect;
   const px = { x: r.x * TILE, y: r.y * TILE, w: r.w * TILE, h: r.h * TILE };
 
@@ -242,6 +244,7 @@ export function buildAreaVis(art: ArtModule, layout: AreaLayout, room: RoomState
   const order = { face: 0, south: 1, cap: 2 } as const;
   for (const w of [...layout.walls].sort((a, b) => order[a.kind] - order[b.kind])) drawWallSegment(art, wctx, { ...w, style: seasonalWallStyle(theme, w.style) });
   for (const w of layout.walls) decorateSeasonalWall(wctx, theme, w);
+  if (wx) decorateWuxiaWalls(wctx, layout);
 
   const wallItems: WallVis[] = [];
   let sign: WallVis | undefined;
@@ -253,7 +256,8 @@ export function buildAreaVis(art: ArtModule, layout: AreaLayout, room: RoomState
       continue;
     }
     // quadros e pôsteres: arte de IA pronta (quando houver) no lugar do procedural
-    const ai = it.kind === 'painting' || it.kind === 'poster' ? pickWallArt(assets, it.kind, it.kind === 'poster' ? 1 : it.variant === 'wide' ? 4 : 2, it.variant, vis.seed) : null;
+    // Giang hồ: nada de arte moderna pronta; os rolos de caligrafia e paisagem vêm da arte procedural.
+    const ai = !wx && (it.kind === 'painting' || it.kind === 'poster') ? pickWallArt(assets, it.kind, it.kind === 'poster' ? 1 : it.variant === 'wide' ? 4 : 2, it.variant, vis.seed) : null;
     if (ai && vis.on === 'face' && drawWallArtAsset(wctx, vis, ai)) continue;
     const s = wallSprites(art, it.kind, it.variant === 'wide' ? undefined : it.variant, 0, vis.seed);
     if (!s) continue;

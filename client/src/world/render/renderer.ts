@@ -1,6 +1,7 @@
 // Desenho do mundo por frame: camada externa -> pisos -> paredes/itens de parede -> entidades
 // ordenadas por profundidade -> luz/escuridão -> ícones. A passada em espaço de tela (texto
 // nítido) fica em overlay.ts.
+import { wuxiaArt } from '../../art/index';
 import { TILE, type ArtModule, type CharacterFrameRequest, type IconName, type ScreenMode, type Sprite } from '../../art/api';
 import type { OfficeStyle, SeasonalTheme, WorldOptions } from '../api';
 import type { WorldAssets } from '../assets';
@@ -21,6 +22,7 @@ import { Lighting } from './lighting';
 import { Particles } from './particles';
 import { carSprite, propSprite, shadowSprite } from './props';
 import { countBadge, fallbackIcon } from './shell-sprites';
+import { drawWuxiaLights, paperScreen } from './wuxia';
 import { decorateElevator, drawSeasonalLights, drawSeasonalWindow, seasonalCostume, seasonalFurniture } from './seasonal';
 import { buildAreaVis, furnitureSprites, opaqueBounds, paintShell, toWallVis, WALL_MARGIN, wallItemOrigin, wallSprites, type AreaVis, type FurnVis, type WallVis } from './scene';
 
@@ -118,12 +120,18 @@ export class Renderer {
   private theme: SeasonalTheme = 'none';
   private style: OfficeStyle = 'modern';
 
+  /** Arte em uso: a original ou a giang hồ (wuxia), conforme o estilo do escritório. */
+  private art: ArtModule;
+  private wuxia: ArtModule | null = null;
+
   constructor(
     readonly canvas: HTMLCanvasElement,
-    private readonly art: ArtModule,
+    private readonly baseArt: ArtModule,
     private readonly sim: Sim,
     private readonly camera: Camera,
   ) {
+    const art = baseArt;
+    this.art = art;
     this.ctx = canvas.getContext('2d', { alpha: false })!;
     this.exterior = layoutExterior(sim.building.cols);
     this.lighting = new Lighting(art, sim);
@@ -138,9 +146,14 @@ export class Renderer {
 
   /** Mantém caches e visuais coerentes com o prédio atual. */
   sync(theme: SeasonalTheme = 'none', style: OfficeStyle = 'modern'): void {
-    this.style = style;
+    const styleChanged = style !== this.style;
+    if (styleChanged) {
+      this.style = style;
+      this.art = style === 'giangho' ? (this.wuxia ??= wuxiaArt(this.baseArt)) : this.baseArt;
+      this.lighting.setArt(this.art, style);
+    }
     const sim = this.sim;
-    const themeChanged = theme !== this.theme;
+    const themeChanged = theme !== this.theme || styleChanged;
     this.theme = theme;
     const assetsChanged = this.builtAssetsVersion !== this.assetsVersion || themeChanged;
     if (this.baseCols !== sim.building.cols || assetsChanged) this.buildBase();
@@ -150,7 +163,7 @@ export class Renderer {
       for (const a of [...sim.building.core, sim.building.corridor]) {
         want.add(a.id);
         const cur = this.areas.get(a.id);
-        if (!cur || cur.layout !== a || assetsChanged) this.areas.set(a.id, buildAreaVis(this.art, a, undefined, this.assets, theme));
+        if (!cur || cur.layout !== a || assetsChanged) this.areas.set(a.id, buildAreaVis(this.art, a, undefined, this.assets, theme, this.style));
       }
       for (const room of sim.rooms.values()) {
         if (!room.present) continue;
@@ -166,7 +179,7 @@ export class Renderer {
       this.occupiedSlots.add(room.slot);
       const cur = this.areas.get(room.id);
       if (!cur || cur.layout !== room.layout || cur.version !== room.version || assetsChanged) {
-        this.areas.set(room.id, buildAreaVis(this.art, room.layout, room, this.assets, theme));
+        this.areas.set(room.id, buildAreaVis(this.art, room.layout, room, this.assets, theme, this.style));
       } else cur.room = room;
     }
     for (const [id, vis] of this.areas) if (vis.room && !vis.room.present) this.areas.delete(id);
@@ -506,6 +519,15 @@ export class Renderer {
         drawSeasonalLights(ctx, this.theme, vis.layout, vis.room ? vis.room.light(now) : 1);
       }
     }
+    if (this.style === 'giangho') {
+      // Lanternas: um brilho suave de dia, aceso de verdade à noite (e só com a luz da sala ligada).
+      const glow = 0.3 + 0.7 * this.night;
+      for (const vis of this.areas.values()) {
+        if (vis.room && vis.room.phase !== 'ready') continue;
+        if (!visible(vis.px.x, vis.px.y, vis.px.w, vis.px.h)) continue;
+        drawWuxiaLights(ctx, vis.layout, (vis.room ? vis.room.light(now) : 1) * glow);
+      }
+    }
     // giroflex e balão "!" do alarme de CI (brilham também no escuro)
     this.roomFx.drawLights(ctx, this.sim, this.heads, now, view);
 
@@ -637,6 +659,8 @@ export class Renderer {
         const mode = live ? live.mode : TV_MODES[Math.floor(now / 9000) % TV_MODES.length];
         const seed = live ? live.seed : w.seed;
         if (r) this.safe(() => this.art.drawScreen(ctx, { x: o.x + r.x, y: o.y + rise + r.y, w: r.w, h: r.h }, mode, now, seed));
+        // Giang hồ: a TV vira um painel de teatro de sombras (o programa como tinta sobre papel).
+        if (r && this.style === 'giangho') paperScreen(ctx, { x: o.x + r.x, y: o.y + rise + r.y, w: r.w, h: r.h });
         return;
       }
       case 'mirror': {
@@ -782,6 +806,7 @@ export class Renderer {
         const r = s.rects.screen;
         const mode = this.deskScreen(f, area);
         this.safe(() => this.art.drawScreen(ctx, { x: dx + r.x, y: dy + r.y, w: r.w, h: r.h }, mode, now, f.seed));
+        if (this.style === 'giangho') paperScreen(ctx, { x: dx + r.x, y: dy + r.y, w: r.w, h: r.h });
       } else if (f.kind === 'coffee_machine' && state === 1) {
         this.drawSteam(f.ax, dy + 2, now, f.seed);
       } else if (f.kind === 'arcade' && s.rects?.screen) {

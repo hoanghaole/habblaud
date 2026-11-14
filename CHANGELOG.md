@@ -19,6 +19,14 @@ do meio (0.**3**.0).
   cintura, e café, notebook, papéis e celular viram chá, rolo de bambu, pergaminho e leque. Subagentes são discípulos
   de túnica curta, com a cor do crachá na faixa. Vale só neste computador (não vai ao Habblaud World) e combina com
   os temas sazonais; `npx tsx scripts/wuxia-sheet.ts` gera uma folha comparando os dois estilos.
+- **Casa de época no estilo “Wuxia”.** Com o estilo ligado, o escritório inteiro muda: paredes de reboco claro com
+  lambri de madeira, colunas laqueadas e lanternas vermelhas penduradas (que acendem à noite), piso de tábuas nas
+  salas e lajes de pedra no corredor, tapetes laqueados com barra dourada. Os móveis trocam plástico e metal por
+  madeira (mesmas posições, assentos e telas) e os mais modernos são redesenhados: bambu e bonsai no lugar das
+  plantas, jarras de vinho no bebedouro, fogareiro com bule na cafeteira, lanterna na luminária, armário de ervas na
+  máquina de lanches, biombos de treliça nas divisórias de vidro, rolos de caligrafia e paisagens a nanquim nos
+  pôsteres e quadros. As telas das mesas e a TV viram tinta sobre papel. `npx tsx scripts/wuxia-furniture-sheet.ts`
+  compara os móveis dos dois estilos.
 
 ## [1.0.3] - 2026-10-16
 

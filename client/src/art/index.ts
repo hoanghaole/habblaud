@@ -32,6 +32,7 @@ import { CHUNK_PX, floorChunk } from './surfaces/floor';
 import { WALL_CAP_H, WALL_FACE_H, capColor, southWallTile, wallFaceTile } from './surfaces/walls';
 import { renderRug } from './surfaces/rug';
 import { roomTheme as roomThemePure } from './theme';
+import { GOLD, wuxiaFurniture, wuxiaRugColor } from './wuxia/furniture';
 
 export * from './api';
 export { hash32 };
@@ -308,6 +309,114 @@ export function drawSouthWall(ctx: CanvasRenderingContext2D, x: number, y: numbe
 
 /** Para depuração/prévia: tamanho e âncora padrão dos personagens. */
 export const CHARACTER_SHEET = { w: CHAR_W, h: CHAR_H } as const;
+
+// ------------------------------------------------------------------ estilo giang hồ (wuxia)
+// Mesma arte, com outro material: móveis de época (mesmas caixas/âncoras), piso de tábuas e lajes de pedra, tapetes
+// laqueados com barra dourada e paredes de reboco claro com lambri de madeira. Ver ./wuxia/furniture.ts.
+
+const wxFurnCache = new Cache<FurnitureSprites>(4000);
+const wxFloorCache = new Cache<HTMLCanvasElement>(1500);
+
+export function wuxiaFurnitureSprites(kind: FurnitureKind, variant?: string, state?: number, opts: { seed?: number } = {}): FurnitureSprites {
+  const n = normalizeFurniture(kind, variant, state, opts.seed);
+  const key = `${kind}|${n.variant ?? '-'}|${n.state}|${n.vseed}`;
+  return wxFurnCache.get(key, () => {
+    const f = wuxiaFurniture(kind, n.variant, n.state, n.vseed);
+    return { base: toSprite(f.base), front: f.front ? toSprite(f.front) : undefined };
+  });
+}
+
+/** Parede de época: reboco cor de papel com lambri de madeira; vidro e fachada externa ficam como estão. */
+export function wuxiaWallStyle(s: WallStyle): WallStyle {
+  if (s.exterior || s.pattern === 'glass') return { ...s, trim: '#8e2f2a' };
+  return { base: '#eadcc0', trim: '#8e2f2a', pattern: 'wood_panel' };
+}
+
+/** Piso trocado: carpete vira tábua escura, concreto vira laje de pedra; o resto ganha um tom mais quente. */
+function wuxiaFloorChunk(kind: FloorKind, cx: number, cy: number, opts: { seed: number; tint?: string; tint2?: string }): HTMLCanvasElement {
+  const outdoor = kind === 'grass' || kind === 'sidewalk' || kind === 'street';
+  const srcKind: FloorKind = kind === 'carpet' ? 'wood' : kind;
+  const c = toCanvas(floorChunk(srcKind, cx, cy, srcKind === kind ? opts : { seed: opts.seed }));
+  if (outdoor) return c;
+  const ctx = c.getContext('2d');
+  if (!ctx) return c;
+  ctx.save();
+  ctx.globalCompositeOperation = 'multiply';
+  ctx.fillStyle = kind === 'carpet' ? '#b98a64' : kind === 'concrete' ? '#c9c4b0' : '#f2e6cc';
+  ctx.fillRect(0, 0, c.width, c.height);
+  ctx.restore();
+  if (kind === 'concrete') {
+    // Lajes de 2x1 tiles, fileiras desencontradas.
+    ctx.fillStyle = 'rgba(70,64,52,0.35)';
+    for (let y = 0; y < c.height; y += TILE) {
+      ctx.fillRect(0, y, c.width, 1);
+      const off = ((cy * c.height + y) / TILE) % 2 ? TILE : 0;
+      for (let x = off; x < c.width; x += TILE * 2) ctx.fillRect(x, y, 1, TILE);
+    }
+  }
+  return c;
+}
+
+function wuxiaDrawFloor(ctx: CanvasRenderingContext2D, kind: FloorKind, x: number, y: number, w: number, h: number, opts: { seed: number; tint?: string; tint2?: string }): void {
+  const cx0 = Math.floor(x / CHUNK_PX);
+  const cy0 = Math.floor(y / CHUNK_PX);
+  const cx1 = Math.ceil((x + w) / CHUNK_PX);
+  const cy1 = Math.ceil((y + h) / CHUNK_PX);
+  for (let cy = cy0; cy < cy1; cy++) {
+    for (let cx = cx0; cx < cx1; cx++) {
+      const key = `wf|${kind}|${opts.seed}|${opts.tint ?? ''}|${opts.tint2 ?? ''}|${cx}|${cy}`;
+      const chunk = wxFloorCache.get(key, () => wuxiaFloorChunk(kind, cx, cy, opts));
+      const px = cx * CHUNK_PX;
+      const py = cy * CHUNK_PX;
+      const sx = Math.max(0, x - px);
+      const sy = Math.max(0, y - py);
+      const ex = Math.min(CHUNK_PX, x + w - px);
+      const ey = Math.min(CHUNK_PX, y + h - py);
+      if (ex <= sx || ey <= sy) continue;
+      ctx.drawImage(chunk, sx, sy, ex - sx, ey - sy, px + sx, py + sy, ex - sx, ey - sy);
+    }
+  }
+}
+
+/** Tapete laqueado com barra dourada e nuvens nos cantos. */
+function wuxiaDrawRug(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, _color: string, seed: number): void {
+  drawRug(ctx, x, y, w, h, wuxiaRugColor(seed), seed);
+  const rx = Math.round(x), ry = Math.round(y), rw = Math.floor(w), rh = Math.floor(h);
+  if (rw < 16 || rh < 12) return;
+  ctx.save();
+  ctx.fillStyle = GOLD;
+  ctx.fillRect(rx + 3, ry + 3, rw - 6, 1);
+  ctx.fillRect(rx + 3, ry + rh - 4, rw - 6, 1);
+  ctx.fillRect(rx + 3, ry + 3, 1, rh - 6);
+  ctx.fillRect(rx + rw - 4, ry + 3, 1, rh - 6);
+  for (const [cx, cy] of [[rx + 6, ry + 6], [rx + rw - 9, ry + 6], [rx + 6, ry + rh - 8], [rx + rw - 9, ry + rh - 8]] as const) {
+    ctx.fillRect(cx, cy, 3, 1);
+    ctx.fillRect(cx + 1, cy + 1, 2, 1);
+  }
+  if (rw >= 40 && rh >= 24) {
+    const mx = Math.round(rx + rw / 2), my = Math.round(ry + rh / 2);
+    ctx.fillRect(mx - 3, my, 7, 1);
+    ctx.fillRect(mx, my - 3, 1, 7);
+    ctx.fillRect(mx - 2, my - 2, 1, 1);
+    ctx.fillRect(mx + 2, my + 2, 1, 1);
+    ctx.fillRect(mx + 2, my - 2, 1, 1);
+    ctx.fillRect(mx - 2, my + 2, 1, 1);
+  }
+  ctx.restore();
+}
+
+/** O módulo de arte no estilo giang hồ, montado sobre um módulo base (o resto continua igual). */
+export function wuxiaArt(base: ArtModule): ArtModule {
+  return {
+    ...base,
+    furnitureSprites: wuxiaFurnitureSprites,
+    drawFloor: wuxiaDrawFloor,
+    drawRug: wuxiaDrawRug,
+    drawWallFace: (ctx, x, y, w, style, opts) => base.drawWallFace(ctx, x, y, w, wuxiaWallStyle(style), opts),
+    drawWallTop: (ctx, x, y, w, h, style) => base.drawWallTop(ctx, x, y, w, h, wuxiaWallStyle(style)),
+    drawSouthWall: (ctx, x, y, w, style, opts) => base.drawSouthWall(ctx, x, y, w, wuxiaWallStyle(style), opts),
+  };
+}
 
 // Garantia em tempo de compilação de que este módulo cumpre o contrato ArtModule.
 const _contract: ArtModule = {

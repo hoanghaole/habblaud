@@ -157,7 +157,7 @@ export class SettingsPopover implements UiComponent {
       [['modern', tr('Moderno')], ['giangho', tr('Wuxia')]],
       (v) => ctx.updatePrefs({ style: v }),
     );
-    this.style.row.append(h('span', { class: 'ui-set__hint', text: tr('Wuxia: os agentes viram heróis de capa e espada (espadachins, monges, taoistas, mendigos, heroínas e letrados). Só neste computador.') }));
+    this.style.row.append(h('span', { class: 'ui-set__hint', text: tr('Wuxia: os agentes viram heróis de capa e espada e o escritório vira uma casa de época (madeira laqueada, lanternas, bambu, caligrafia). Só neste computador.') }));
     this.soundGroup = new SoundSettingsGroup(ctx, sound);
 
     // Nomes dos idiomas sempre na própria língua, para quem não entende o idioma atual achar o seu.

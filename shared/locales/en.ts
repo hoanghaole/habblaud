@@ -634,7 +634,7 @@ export const EN: Readonly<Record<string, string>> = {
   "Estilo do escritório": "Office style",
   "Moderno": "Modern",
   "Wuxia": "Wuxia",
-  "Wuxia: os agentes viram heróis de capa e espada (espadachins, monges, taoistas, mendigos, heroínas e letrados). Só neste computador.": "Wuxia: agents become martial-arts heroes (swordsmen, monks, Taoists, beggars, heroines and scholars). This computer only.",
+  "Wuxia: os agentes viram heróis de capa e espada e o escritório vira uma casa de época (madeira laqueada, lanternas, bambu, caligrafia). Só neste computador.": "Wuxia: agents become martial-arts heroes and the office turns into an old Chinese house (lacquered wood, lanterns, bamboo, calligraphy). This computer only.",
   "Natal": "Christmas",
   "Halloween": "Halloween",
   "Automático: Halloween em outubro e Natal de 1º de novembro a 26 de dezembro; no resto do ano, o visual original. Nenhum: sempre o original.": "Automatic: Halloween in October and Christmas from November 1 to December 26; the rest of the year, the original look. None: always the original.",

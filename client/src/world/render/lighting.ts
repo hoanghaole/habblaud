@@ -6,6 +6,7 @@
 // a chave de luz muda (hora em passos de poucos segundos, luz das salas, ocupação das áreas comuns,
 // montagem de salas); por frame, um drawImage em 'multiply' e alguns sprites de brilho em cache.
 import { TILE, type ArtModule, type ScreenMode } from '../../art/api';
+import type { OfficeStyle } from '../api';
 import { mulberry32 } from '../../../../shared/hash';
 import { BUILDING_H, COL_W, CORRIDOR_H, CORRIDOR_Y } from '../constants';
 import type { ExteriorLayout, SlotShell } from '../layout/exterior';
@@ -159,10 +160,18 @@ export class Lighting {
   private reduced = prefersReducedMotion();
   private reducedAt = 0;
 
+  /** Estilo do escritório: no giang hồ o armário de ervas (ex-máquina de lanches) não acende. */
+  private style: OfficeStyle = 'modern';
+
   constructor(
-    private readonly art: ArtModule,
+    private art: ArtModule,
     private readonly sim: Sim,
   ) {}
+
+  setArt(art: ArtModule, style: OfficeStyle): void {
+    this.art = art;
+    this.style = style;
+  }
 
   /**
    * Atualiza o ambiente (recalcula a luz no máximo a cada RECALC_MS, ou já ao trocar a preferência
@@ -401,7 +410,7 @@ export class Lighting {
       const a = vis.room ? k * l : k;
       for (const f of vis.furniture) {
         if (f.kind === 'floor_lamp') halo(lamp, f.ax, f.ay - 6, 92, 66, a);
-        else if (f.kind === 'vending_machine') halo(cool, f.ax, f.ay + 4, 52, 34, 0.9 * a);
+        else if (f.kind === 'vending_machine' && this.style !== 'giangho') halo(cool, f.ax, f.ay + 4, 52, 34, 0.9 * a);
         else if (f.kind === 'arcade') halo(arcade, f.ax, f.ay + 4, 44, 30, 0.8 * a);
       }
     }
@@ -480,7 +489,7 @@ export class Lighting {
           const g = this.lampHead(f);
           ctx.globalAlpha = 0.5 * n;
           ctx.drawImage(warm, Math.round(g.x - 16), Math.round(g.y - 16), 32, 32);
-        } else if (f.kind === 'vending_machine' || f.kind === 'arcade') {
+        } else if ((f.kind === 'vending_machine' && this.style !== 'giangho') || f.kind === 'arcade') {
           ctx.globalAlpha = 0.25 * k;
           ctx.drawImage(cool, Math.round(f.ax - 24), Math.round(f.ay - 36));
         }
