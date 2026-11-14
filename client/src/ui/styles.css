@@ -2869,6 +2869,21 @@
   border: 1px solid var(--ui-line);
 }
 
+/* Tema do escritório: 5 opções em duas linhas (3 + 2), sem quebrar os rótulos. */
+.ui-seg--themes {
+  grid-auto-flow: row;
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.ui-seg--themes .ui-seg__opt {
+  grid-column: span 2;
+  white-space: nowrap;
+}
+
+.ui-seg--themes .ui-seg__opt:nth-child(n + 4) {
+  grid-column: span 3;
+}
+
 .ui-seg__opt {
   height: 26px;
   border-radius: 6px;

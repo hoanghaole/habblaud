@@ -2156,14 +2156,12 @@ export const FR: Readonly<Record<string, string>> = {
 
   // client/src/ui/settings.ts
   "Tema do escritório": "Thème du bureau",
-  "Estilo do escritório": "Style du bureau",
-  "Moderno": "Moderne",
   "Wuxia": "Wuxia",
   "Estalagem": "Auberge",
   "Casa de banhos": "Bains",
   "Casa de chá": "Maison de thé",
   "Pavilhão": "Pavillon",
-  "Wuxia: os agentes viram heróis de capa e espada e o escritório vira uma casa de época (madeira laqueada, lanternas, bambu, caligrafia). Só neste computador.": "Wuxia : les agents deviennent des héros d'arts martiaux et le bureau, une demeure chinoise d'autrefois (bois laqué, lanternes, bambou, calligraphie). Sur cet ordinateur seulement.",
+  "Wuxia: os agentes viram heróis de capa e espada e o escritório vira uma casa de época. Só neste computador: o prédio no Habblaud World fica sem tema.": "Wuxia : les agents deviennent des héros d'arts martiaux et le bureau, une demeure chinoise d'autrefois. Sur cet ordinateur seulement : votre immeuble dans Habblaud World reste sans thème.",
   "Natal": "Noël",
   "Halloween": "Halloween",
   "Automático: Halloween em outubro e Natal de 1º de novembro a 26 de dezembro; no resto do ano, o visual original. Nenhum: sempre o original.": "Automatique : Halloween en octobre et Noël du 1er novembre au 26 décembre ; le reste de l'année, l'apparence d'origine. Aucun : toujours l'original.",

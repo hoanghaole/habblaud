@@ -13,6 +13,8 @@ import type { WorldThemeLink } from './world/world-dialog';
 import { LOCALE_STORAGE_KEY, LOCALES, normalizeLocale, tr, type Locale } from '../../../shared/i18n';
 
 type LanguageChoice = 'auto' | Locale;
+/** Opções do seletor de tema: os sazonais (vão também para o prédio no World) e o estilo Wuxia (só local). */
+type ThemeChoice = UiPrefs['theme'] | 'giangho';
 
 /** Idioma escolhido nas Configurações ("auto" = o do navegador). */
 function savedLanguage(): LanguageChoice {
@@ -88,8 +90,7 @@ export class SettingsPopover implements UiComponent {
   private bubbles: ReturnType<typeof segmented<UiPrefs['bubbles']>>;
   private liveliness: ReturnType<typeof segmented<UiPrefs['liveliness']>>;
   private daylight: ReturnType<typeof segmented<UiPrefs['daylight']>>;
-  private theme: ReturnType<typeof segmented<UiPrefs['theme']>>;
-  private style: ReturnType<typeof segmented<UiPrefs['style']>>;
+  private theme: ReturnType<typeof segmented<ThemeChoice>>;
   private language: ReturnType<typeof segmented<LanguageChoice>>;
   private soundGroup: SoundSettingsGroup;
   private demoGroup: HTMLElement;
@@ -142,22 +143,21 @@ export class SettingsPopover implements UiComponent {
       (v) => ctx.updatePrefs({ daylight: v }),
     );
     this.daylight.row.append(h('span', { class: 'ui-set__hint', text: tr('Automático: céu, luzes e sol nas janelas seguem a hora local.') }));
-    this.theme = segmented<UiPrefs['theme']>(
+    this.theme = segmented<ThemeChoice>(
       tr('Tema do escritório'),
-      [['auto', tr('Automático')], ['none', tr('Nenhum')], ['christmas', tr('Natal')], ['halloween', tr('Halloween')]],
+      [['auto', tr('Automático')], ['none', tr('Nenhum')], ['christmas', tr('Natal')], ['halloween', tr('Halloween')], ['giangho', tr('Wuxia')]],
       (v) => {
-        ctx.updatePrefs({ theme: v });
+        // Wuxia é um estilo só deste computador: o tema sazonal fica "nenhum" (é o que vai para o prédio no World).
+        const theme = v === 'giangho' ? 'none' : v;
+        ctx.updatePrefs({ theme, style: v === 'giangho' ? 'giangho' : 'modern' });
         // Com o World ligado e a conta aprovada, o tema também vai para o prédio (clicar de novo reenvia).
-        void this.world.onThemePicked(v);
+        void this.world.onThemePicked(theme);
       },
     );
+    // Cinco opções: duas linhas (três em cima, duas embaixo) em vez de rótulos quebrados.
+    this.theme.row.querySelector('.ui-seg')?.classList.add('ui-seg--themes');
     this.theme.row.append(h('span', { class: 'ui-set__hint', text: tr('Automático: Halloween em outubro e Natal de 1º de novembro a 26 de dezembro; no resto do ano, o visual original. Nenhum: sempre o original.') }));
-    this.style = segmented<UiPrefs['style']>(
-      tr('Estilo do escritório'),
-      [['modern', tr('Moderno')], ['giangho', tr('Wuxia')]],
-      (v) => ctx.updatePrefs({ style: v }),
-    );
-    this.style.row.append(h('span', { class: 'ui-set__hint', text: tr('Wuxia: os agentes viram heróis de capa e espada e o escritório vira uma casa de época (madeira laqueada, lanternas, bambu, caligrafia). Só neste computador.') }));
+    this.theme.row.append(h('span', { class: 'ui-set__hint', text: tr('Wuxia: os agentes viram heróis de capa e espada e o escritório vira uma casa de época. Só neste computador: o prédio no Habblaud World fica sem tema.') }));
     this.soundGroup = new SoundSettingsGroup(ctx, sound);
 
     // Nomes dos idiomas sempre na própria língua, para quem não entende o idioma atual achar o seu.
@@ -203,7 +203,7 @@ export class SettingsPopover implements UiComponent {
       'div',
       { class: 'ui-popover ui-settings', role: 'dialog', tabIndex: -1, attrs: { 'aria-label': tr('Configurações'), id: 'ui-settings', popover: 'auto' } },
       h('div', { class: 'ui-popover__head' }, h('h2', { text: tr('Configurações') }), close),
-      h('div', { class: 'ui-set-group' }, h('h3', { text: tr('Aparência') }), this.theme.row, this.style.row),
+      h('div', { class: 'ui-set-group' }, h('h3', { text: tr('Aparência') }), this.theme.row),
       h(
         'div',
         { class: 'ui-set-group' },
@@ -291,8 +291,7 @@ export class SettingsPopover implements UiComponent {
     this.bubbles.set(p.bubbles);
     this.liveliness.set(p.liveliness);
     this.daylight.set(p.daylight);
-    this.theme.set(p.theme);
-    this.style.set(p.style);
+    this.theme.set(p.style === 'giangho' ? 'giangho' : p.theme);
     this.language.set(savedLanguage());
     this.soundGroup.render();
     setHidden(this.demoGroup, this.ctx.store.mock || access().remote);

@@ -16,13 +16,13 @@ do meio (0.**3**.0).
   navegador ou o sistema em `vi` já abre nele; no servidor, `HABBLAUD_LANG=vi`). O estilo “Wuxia” vira **Kiếm hiệp**,
   com as áreas comuns de época (Khách điếm, Trà thất, Đình viện, Tịnh phòng). O Habblaud World ainda não tem
   vietnamita: os e-mails e avisos da conta vão em inglês.
-- **Estilo do escritório “Wuxia” (giang hồ).** Em **Configurações › Aparência › Estilo do escritório**, os agentes
+- **Tema do escritório “Wuxia” (giang hồ).** Em **Configurações › Aparência › Tema do escritório › Wuxia**, os agentes
   viram heróis de capa e espada: espadachins com faixa na testa e espada nas costas, monges de cabeça raspada e
   kasaya, taoistas de coroa e espanador, mendigos com cabaça, heroínas com grampo no cabelo e letrados de gorro com
   hastes. A escola sai da aparência (sempre a mesma para o mesmo personagem), a túnica tem gola cruzada e faixa na
   cintura, e café, notebook, papéis e celular viram chá, rolo de bambu, pergaminho e leque. Subagentes são discípulos
-  de túnica curta, com a cor do crachá na faixa. Vale só neste computador (não vai ao Habblaud World) e combina com
-  os temas sazonais; `npx tsx scripts/wuxia-sheet.ts` gera uma folha comparando os dois estilos.
+  de túnica curta, com a cor do crachá na faixa. Vale só neste computador: para o Habblaud World o tema fica
+  “nenhum”; `npx tsx scripts/wuxia-sheet.ts` gera uma folha comparando os dois estilos.
 - **Casa de época no estilo “Wuxia”.** Com o estilo ligado, o escritório inteiro muda: paredes de reboco claro com
   lambri de madeira, colunas laqueadas e lanternas vermelhas penduradas (que acendem à noite), piso de tábuas nas
   salas e lajes de pedra no corredor, tapetes laqueados com barra dourada. Os móveis trocam plástico e metal por
