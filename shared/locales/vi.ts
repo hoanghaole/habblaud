@@ -992,7 +992,7 @@ export const VI: Readonly<Record<string, string>> = {
   "Pingue-pongue? 🏓": "Bóng bàn không? 🏓",
   "Bora uma partidinha? 🏓": "Làm một ván nhanh không? 🏓",
   "Vem jogar ping-pong!": "Ra chơi bóng bàn đi!",
-  "Vem tomar uma surra no ping-pong 😏": "Ra bóng bàn để bị hành nào 😏",
+  "Vem tomar uma surra no ping-pong 😏": "Ra bóng bàn để thua tôi nào 😏",
   "Revanche no ping-pong? 🏓": "Tái đấu bóng bàn không? 🏓",
   "Bora tomar um café? ☕": "Đi lấy cà phê không? ☕",
   "Pausa pro café? ☕": "Nghỉ uống cà phê nhé? ☕",
@@ -1047,7 +1047,7 @@ export const VI: Readonly<Record<string, string>> = {
   "Tá jogando muito!": "Họ đá hay quá!",
   "Não acredito! 😱": "Không thể nào! 😱",
   "Eu sabia!": "Biết ngay mà!",
-  "Que reviravolta!": "Cú twist bất ngờ quá!",
+  "Que reviravolta!": "Tình tiết bất ngờ quá!",
   "Mentira!!": "Không thể nào!!",
   "Esse casal! 😍": "Cặp này! 😍",
   "Que romance…": "Lãng mạn quá…",
@@ -1164,7 +1164,7 @@ export const VI: Readonly<Record<string, string>> = {
   "Não acredito 😮": "Không thể tin nổi 😮",
   "Verdade!": "Đúng vậy!",
   "Hahaha": "Hahaha",
-  "Nem me fala…": "Đừng nói nữa…",
+  "Nem me fala…": "Còn phải nói…",
   "Pois é": "Ừ",
   "Mentira!": "Không thể nào!",
   "Que isso!": "Thôi nào!",
@@ -3279,4 +3279,10 @@ export const VI: Readonly<Record<string, string>> = {
   "Carimbo deixado na portaria: {0}": "Đã để lại con dấu ở quầy lễ tân: {0}",
   "Entre no prédio ou chegue mais perto da porta para carimbar.": "Hãy vào tòa nhà hoặc lại gần cửa hơn để đóng dấu.",
   "O carimbo não foi deixado. Tente de novo.": "Con dấu chưa được để lại. Hãy thử lại.",
+
+  // frases que eram montadas fora do tr() (feed, Meu dia, rodas, ajuda)
+  "{0} em {1}": "{0} ở {1}",
+  " com {0}": " với {0}",
+  "Total": "Tổng",
+  "Status": "Trạng thái",
 };

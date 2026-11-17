@@ -420,7 +420,7 @@ activities and animations. The day/night cycle is still a separate option.
 
 ### Languages
 
-The interface is in **Portuguese, English, Spanish and French**. It follows the browser's language; in
+The interface is in **Portuguese, English, Spanish, French and Vietnamese**. It follows the browser's language; in
 **Settings › Language** you can pin one (the choice is saved in this browser). The texts the server builds
 (activities, notices, terminal, logs and the install scripts) follow `HABBLAUD_LANG` and, without it, the
 system language, except English: many machines and every container come in English by default, even for people who use another language.
@@ -730,7 +730,7 @@ Everything works without configuring anything. If you need to adjust something, 
 | `HABBLAUD_CODEX_DIRS` | automatic detection | Codex folders, comma-separated (instead of `~/.codex*` and `CODEX_HOME`). |
 | `HABBLAUD_CODEX_BIN` | `codex` from PATH (on Windows, `codex.exe`) | The Codex binary that delivers the messages (`codex queue`), in Node mode or in `npm run codex:bridge`. |
 | `HABBLAUD_UPDATE_CHECK` | on | `0` turns off the new-version check (a request to the repository's releases on GitHub every 6 h). |
-| `HABBLAUD_LANG` | system language (except English), otherwise `pt-BR` | Language of the texts the server builds (activities, notices, logs): `pt-BR`, `en`, `es` or `fr`. The interface follows the browser or the choice in Settings › Language. See [Languages](#languages). |
+| `HABBLAUD_LANG` | system language (except English), otherwise `pt-BR` | Language of the texts the server builds (activities, notices, logs): `pt-BR`, `en`, `es`, `fr` or `vi`. The interface follows the browser or the choice in Settings › Language. See [Languages](#languages). |
 | `HABBLAUD_ACCOUNTS` | — | JSON to customize name, letter or color, matched by the account folder name. E.g. `[{"id":".claude-conta2","name":"Trabalho","short":"T","color":"#5cc97b"}]`. |
 
 **In Docker**, `HABBLAUD_PORT`, `HABBLAUD_BIND`, `HABBLAUD_ALLOWED_HOSTS`, `HABBLAUD_DEMO`, `HABBLAUD_TERMINAL`,

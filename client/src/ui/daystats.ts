@@ -500,7 +500,7 @@ export class DayPanel implements UiComponent {
         ? []
         : [
             ...TIMED_STATUSES.filter((s) => this.visible.has(s) && col.ms[s] > 0).map((s) => ({ status: s, label: STATUS_TEXT[s], value: formatAgentTime(col.ms[s]) })),
-            { label: 'Total', value: formatAgentTime(col.total) },
+            { label: tr('Total'), value: formatAgentTime(col.total) },
           ];
     // A dica sai do topo da coluna pintada (não do topo do gráfico).
     this.bindTip(el, () => `${col.range}${col.now ? tr(' · agora') : col.future ? tr(' · ainda não chegou') : ''}`, rows, () => stack.lastElementChild ?? stack);
@@ -553,7 +553,7 @@ export class DayPanel implements UiComponent {
       );
       const tipRows = (): TipRow[] => [
         ...TIMED_STATUSES.filter((s) => this.visible.has(s) && r.ms[s] > 0).map((s) => ({ status: s, label: STATUS_TEXT[s], value: formatAgentTime(r.ms[s]) })),
-        { label: 'Total', value: formatAgentTime(visibleTotal(r.ms, this.visible)) },
+        { label: tr('Total'), value: formatAgentTime(visibleTotal(r.ms, this.visible)) },
       ];
       this.bindTip(li, () => r.name, tipRows);
       list.append(li);

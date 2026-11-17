@@ -37,7 +37,7 @@ import {
 import * as L from './lines';
 import { bondBetween, hasTrait, personaFor, TRAITS, type Persona, type TraitId } from './persona';
 import { DELIVERY_REWARD, TURN_REWARD, Wallets, type StorageLike } from './wallet';
-import { tr } from '../../../../shared/i18n';
+import { intlLocale, tr } from '../../../../shared/i18n';
 import { coreAreaName } from '../area-names';
 
 /** Texto flutuante sobre a cabeça ("+🪙10"), desenhado pelo overlay. */
@@ -1170,7 +1170,7 @@ export class Social {
     const label = g.kind === 'tv' && g.program ? tr('Vendo {0} na TV', [g.program === 'futebol' ? tr('futebol') : g.program === 'novela' ? tr('novela') : tr('desenho')]) : KINDS[g.kind].label;
     const going = g.phase === 'gather' ? tr(' (a caminho)') : '';
     const bet = g.bet && KINDS[g.kind].match ? tr(' · valendo 🪙{0}', [g.bet]) : '';
-    return `${KINDS[g.kind].emoji} ${label}${others.length ? ` com ${joinNames(others)}` : ''}${bet}${going}`;
+    return `${KINDS[g.kind].emoji} ${label}${others.length ? tr(' com {0}', [joinNames(others)]) : ''}${bet}${going}`;
   }
 
   /** Tudo o que a interface mostra da vida social de um agente presente (null se não está no escritório). */
@@ -1260,7 +1260,5 @@ export class Social {
 }
 
 function joinNames(names: string[]): string {
-  if (names.length <= 1) return names[0] ?? '';
-  if (names.length === 2) return `${names[0]} e ${names[1]}`;
-  return `${names.slice(0, -1).join(', ')} e ${names[names.length - 1]}`;
+  return new Intl.ListFormat(intlLocale(), { type: 'conjunction' }).format(names);
 }

@@ -40,6 +40,13 @@ do meio (0.**3**.0).
 - **Áreas comuns com nome de época (“Wuxia”).** Com o estilo ligado, a recepção vira a Estalagem, a copa a Casa de
   chá, o lounge o Pavilhão e os banheiros a Casa de banhos, nos rótulos do mapa e no feed (“ganhou no Pavilhão”).
 
+### Corrigido
+
+- **Frases que ficavam em português em qualquer idioma.** A dica de cada linha do feed (“Ana em loja”), o “em 5 min”
+  das contagens, os “3 de 10” do histórico, da barra lateral e das barras de tarefas, o “com Rafaela e Bia” das rodas
+  e os títulos “Total” e “Status” do Meu dia e da Ajuda agora passam pela tradução (e a lista de nomes usa o “e” de
+  cada idioma).
+
 ## [1.0.3] - 2026-10-16
 
 ### Corrigido

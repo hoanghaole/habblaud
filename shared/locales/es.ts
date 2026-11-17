@@ -3280,4 +3280,10 @@ export const ES: Readonly<Record<string, string>> = {
   "Carimbo deixado na portaria: {0}": "Sello dejado en la recepción: {0}",
   "Entre no prédio ou chegue mais perto da porta para carimbar.": "Entra al edificio o acércate más a la puerta para sellar.",
   "O carimbo não foi deixado. Tente de novo.": "El sello no se dejó. Inténtalo de nuevo.",
+
+  // frases que eram montadas fora do tr() (feed, Meu dia, rodas, ajuda)
+  "{0} em {1}": "{0} en {1}",
+  " com {0}": " con {0}",
+  "Total": "Total",
+  "Status": "Estado",
 };
